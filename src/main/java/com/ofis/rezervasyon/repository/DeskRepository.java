@@ -5,9 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface DeskRepository extends JpaRepository<Desk, Long> {
-    List<Desk> findByFloorId(Long id);
 
     List<Desk> findByIsActiveTrue();
-
-    List<Desk> findByFloorIdAndIsActiveTrue(Long id);
+    List<Desk> findByFloorId(Long floorId);
+    List<Desk> findByFloorIdAndIsActiveTrue(Long floorId);
+    boolean existsByDeskNumberAndFloorId(String deskNumber, Long floorId);
+    boolean existsByDeskNumberAndFloorIdAndIsActiveTrue(String deskNumber, Long floorId);
 }
