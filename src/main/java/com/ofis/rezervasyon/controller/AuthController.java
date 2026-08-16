@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ofis.rezervasyon.dto.request.LoginRequest;
 import com.ofis.rezervasyon.dto.request.RegisterRequest;
-import com.ofis.rezervasyon.dto.response.UserResponse;
+import com.ofis.rezervasyon.dto.response.AuthResponse;
 import com.ofis.rezervasyon.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -24,14 +24,14 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
-        UserResponse response =authService.register(request);
+    public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest request) {
+        AuthResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@RequestBody @Valid LoginRequest request) {
-        UserResponse response = authService.login(request);
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
+        AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
     

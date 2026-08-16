@@ -51,8 +51,6 @@ public class CustomUserDetails implements UserDetails {
         return true;
     }
 
-    // İhtiyaç duyarsan Controller tarafında oturum açan User entity'sine 
-    // direkt ulaşabilmek için sadece bir getter ekleyebilirsin:
     public User getUser() {
         return user;
     }

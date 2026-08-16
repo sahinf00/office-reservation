@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter { 
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -34,12 +34,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String userEmail;
 
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response); // Filtreyi pas geç, sıradakine devret
+                // Skip the filter and continue the chain if no Authorization header or if it doesn't start with "Bearer "
+                filterChain.doFilter(request, response);
                 return;
             }
 
-            jwt = authHeader.substring(7); // "Bearer " kısmını atla
-            userEmail = jwtService.extractUserName(jwt);
+            jwt = authHeader.substring(7); // Skip the "Bearer " prefix
+            
+            try {
+                userEmail = jwtService.extractUserName(jwt);
+            } catch (Exception e) {
+                // Token might be invalid or expired, skip the filter and continue the chain if so
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);

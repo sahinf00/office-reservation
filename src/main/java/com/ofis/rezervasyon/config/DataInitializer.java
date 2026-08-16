@@ -17,7 +17,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. Check if EMPLOYEE role exists in the database, if not, add it
+        // check if EMPLOYEE role exists in the database, if not, add it
         if (roleRepository.findByName(RoleName.EMPLOYEE).isEmpty()) {
             Role employeeRole = new Role();
             employeeRole.setName(RoleName.EMPLOYEE);
@@ -25,7 +25,7 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("--> EMPLOYEE role automatically added to the database.");
         }
 
-        // Check if ADMIN role exists in the database, if not, add it
+        // check if ADMIN role exists in the database, if not, add it
         if (roleRepository.findByName(RoleName.ADMIN).isEmpty()) {
             Role adminRole = new Role();
             adminRole.setName(RoleName.ADMIN);
