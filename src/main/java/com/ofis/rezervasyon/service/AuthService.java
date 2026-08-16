@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import com.ofis.rezervasyon.repository.UserRepository;
 import com.ofis.rezervasyon.security.CustomUserDetails;
 import com.ofis.rezervasyon.security.JwtService;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import com.ofis.rezervasyon.model.Role;
 import com.ofis.rezervasyon.model.User;
 import com.ofis.rezervasyon.dto.request.LoginRequest;
@@ -34,11 +37,11 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
         
         if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Email is already in use");
+            throw new IllegalStateException("Email is already in use");
         }
 
         Role userRole = roleRepository.findByName(RoleName.EMPLOYEE)
-        .orElseThrow(() -> new RuntimeException("Default role not found"));
+        .orElseThrow(() -> new EntityNotFoundException("Default role not found"));
 
         var user = User.builder()
                 .fullName(request.fullName())

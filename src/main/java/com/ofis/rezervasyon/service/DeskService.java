@@ -23,10 +23,10 @@ public class DeskService {
 
     public DeskResponse createDesk(CreateDeskRequest request) {
         Floor floor = floorRepository.findById(request.floorId())
-            .orElseThrow(() -> new RuntimeException("Floor with ID " + request.floorId() + " does not exist."));
+            .orElseThrow(() -> new EntityNotFoundException("Floor with ID " + request.floorId() + " does not exist."));
         
         if (deskRepository.existsByDeskNumberAndFloorIdAndIsActiveTrue(request.deskNumber(), request.floorId())) {
-            throw new RuntimeException("Desk with number " + request.deskNumber() + " already exists.");
+            throw new IllegalStateException("Desk with number " + request.deskNumber() + " already exists.");
         }
 
         Desk desk = new Desk();
@@ -45,7 +45,7 @@ public class DeskService {
 
     public DeskResponse updateDesk(Long id, UpdateDeskRequest request) {
         Desk desk = deskRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Desk with ID " + id + " does not exist."));
+            .orElseThrow(() -> new EntityNotFoundException("Desk with ID " + id + " does not exist."));
 
         if (!desk.isActive()) {
         throw new IllegalStateException("Inactive desks cannot be updated.");
@@ -62,7 +62,7 @@ public class DeskService {
             );
 
         if (isNumberTaken) {
-            throw new RuntimeException("This floor already has a desk with number " + request.deskNumber() + ".");
+            throw new IllegalStateException("This floor already has a desk with number " + request.deskNumber() + ".");
         }
     }
         desk.setDeskNumber(request.deskNumber());

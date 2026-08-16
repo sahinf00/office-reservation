@@ -6,12 +6,14 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ErrorResponse {
@@ -19,15 +21,17 @@ public class ErrorResponse {
     private int status;
     private String error;
     private String message;
+    private String path;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<FieldErrorDetail> validationErrors;
 
-    public ErrorResponse(LocalDateTime timestamp, int status, String error, String message) {
+    public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, String path) {
         this.timestamp = timestamp;
         this.status = status;
         this.error = error;
         this.message = message;
+        this.path = path;
     }
 }
 
