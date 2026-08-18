@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ofis.rezervasyon.dto.request.CreateFloorRequest;
 import com.ofis.rezervasyon.dto.response.FloorResponse;
-import com.ofis.rezervasyon.service.DeskService;
 import com.ofis.rezervasyon.service.FloorService;
 
 import jakarta.validation.Valid;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class FloorController {
     private final FloorService floorService;
-    private final DeskService deskService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
