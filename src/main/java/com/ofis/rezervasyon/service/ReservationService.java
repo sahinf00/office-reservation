@@ -1,5 +1,7 @@
 package com.ofis.rezervasyon.service;
 
+import java.util.List;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,20 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final DeskRepository deskRepository;
     private final UserRepository userRepository;
+
+    // helper method for mapping Reservation entity to ReservationResponse DTO
+    private ReservationResponse mapToReservationResponse(Reservation reservation) {
+        return new ReservationResponse(
+            reservation.getId(),
+            reservation.getDesk().getId(),
+            reservation.getDesk().getDeskNumber(),
+            reservation.getDesk().getFloor().getFloorNumber(),
+            reservation.getUser().getId(),
+            reservation.getUser().getFullName(),
+            reservation.getReservationDate(),
+            reservation.getStatus()
+        );
+    }
 
     @Transactional
     public ReservationResponse createReservation(CreateReservationRequest request) {
@@ -63,15 +79,7 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.CONFIRMED);
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        return new ReservationResponse(
-            savedReservation.getId(),
-            savedReservation.getDesk().getId(),
-            savedReservation.getDesk().getDeskNumber(),
-            savedReservation.getDesk().getFloor().getFloorNumber(),
-            savedReservation.getUser().getId(),
-            savedReservation.getUser().getFullName(),
-            savedReservation.getReservationDate(),
-            savedReservation.getStatus()
-        );
+        return mapToReservationResponse(savedReservation);
     }
+
 }
