@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockTimeoutException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,13 +53,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
         log.warn("Data integrity violation: {}", ex.getMessage());
-        return buildResponse(HttpStatus.CONFLICT, "Conflict", "Data integrity violation occurred.", request);
+        return buildResponse(HttpStatus.CONFLICT, "Conflict", "This desk is already reserved for the selected date.", request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         log.warn("Access denied: {}", ex.getMessage());
         return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", "You are not authorized to perform this action.", request);
+    }
+
+    @ExceptionHandler({PessimisticLockingFailureException.class, CannotAcquireLockException.class, LockTimeoutException.class})
+    public ResponseEntity<ErrorResponse> handleLockFailure(Exception ex, HttpServletRequest request) {
+        log.warn("Lock failure: {}", ex.getMessage());
+        return buildResponse(HttpStatus.CONFLICT, "Conflict", "The resource is currently locked. Please try again later.", request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
