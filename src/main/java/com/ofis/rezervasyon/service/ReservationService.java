@@ -82,4 +82,15 @@ public class ReservationService {
         return mapToReservationResponse(savedReservation);
     }
 
+    public List <ReservationResponse> getReservationsForCurrentUser() {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+            .orElseThrow(() -> new EntityNotFoundException("User with email " + currentUserEmail + " does not exist."));
+
+        List<Reservation> reservations = reservationRepository.findByUserId(currentUser.getId());
+        return reservations.stream()
+                .map(this::mapToReservationResponse)
+                .toList();
+    }
+
 }
