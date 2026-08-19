@@ -20,7 +20,7 @@ public class FloorService {
 
     public FloorResponse createFloor(CreateFloorRequest request) {
         if(floorRepository.existsByFloorNumber(request.floorNumber())) {
-            throw new RuntimeException("Floor with number " + request.floorNumber() + " already exists.");
+            throw new IllegalStateException("Floor with number " + request.floorNumber() + " already exists.");
         }
 
         Floor floor = new Floor();

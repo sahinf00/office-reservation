@@ -8,7 +8,12 @@ import java.time.LocalDate;
 import com.ofis.rezervasyon.enums.ReservationStatus;
 
 @Entity
-@Table(name = "reservations")
+@Table(name = "reservations", uniqueConstraints = {
+    @UniqueConstraint(
+        name = "uk_desk_date_status", 
+        columnNames = {"desk_id", "reservation_date", "status"}
+    )
+})
 @Getter
 @Setter
 @NoArgsConstructor
