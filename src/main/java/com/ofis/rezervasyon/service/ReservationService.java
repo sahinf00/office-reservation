@@ -87,7 +87,7 @@ public class ReservationService {
         User currentUser = userRepository.findByEmail(currentUserEmail)
             .orElseThrow(() -> new EntityNotFoundException("User with email " + currentUserEmail + " does not exist."));
 
-        List<Reservation> reservations = reservationRepository.findByUserId(currentUser.getId());
+        List<Reservation> reservations = reservationRepository.findByUserIdWithDeskAndFloor(currentUser.getId());
         return reservations.stream()
                 .map(this::mapToReservationResponse)
                 .toList();
