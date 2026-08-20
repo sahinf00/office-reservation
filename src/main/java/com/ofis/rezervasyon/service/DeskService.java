@@ -1,8 +1,7 @@
 package com.ofis.rezervasyon.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ofis.rezervasyon.dto.request.CreateDeskRequest;
 import com.ofis.rezervasyon.dto.request.UpdateDeskRequest;
@@ -21,6 +20,7 @@ public class DeskService {
     private final DeskRepository deskRepository;
     private final FloorRepository floorRepository;
 
+    @Transactional
     public DeskResponse createDesk(CreateDeskRequest request) {
         Floor floor = floorRepository.findById(request.floorId())
             .orElseThrow(() -> new EntityNotFoundException("Floor with ID " + request.floorId() + " does not exist."));
@@ -43,6 +43,7 @@ public class DeskService {
         );
     }
 
+    @Transactional
     public DeskResponse updateDesk(Long id, UpdateDeskRequest request) {
         Desk desk = deskRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Desk with ID " + id + " does not exist."));
@@ -75,6 +76,7 @@ public class DeskService {
         );
     }
 
+    @Transactional
     public void deleteDesk(Long id) {
         Desk desk = deskRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Desk not found: " + id));
