@@ -82,6 +82,7 @@ public class ReservationService {
         return mapToReservationResponse(savedReservation);
     }
 
+    @Transactional(readOnly = true)
     public List <ReservationResponse> getReservationsForCurrentUser() {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(currentUserEmail)
@@ -93,4 +94,31 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
+    public void cancelReservation(Long reservationId) {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+            .orElseThrow(() -> new EntityNotFoundException("User with email " + currentUserEmail + " does not exist."));
+        Reservation reservation = reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new EntityNotFoundException("Reservation with ID " + reservationId + " does not exist."));
+
+        // checks if the reservation belongs to the current user 
+        if (!reservation.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalStateException("You can only cancel your own reservations.");
+        }
+
+        // checks if the reservation is already canceled to prevent redundant operations
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new IllegalStateException("This reservation is already canceled.");
+        }
+
+        //check for date of reservation being in the past or today
+        if (!reservation.getReservationDate().isAfter(java.time.LocalDate.now())) {
+            throw new IllegalStateException("Cannot cancel a reservation made for today or a past date.");
+        }
+
+        // updates the reservation status to CANCELLED and saves the change
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
+    }
 }
