@@ -1,5 +1,10 @@
 package com.ofis.rezervasyon.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +29,20 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final DeskRepository deskRepository;
     private final UserRepository userRepository;
+
+    // helper method for mapping Reservation entity to ReservationResponse DTO
+    private ReservationResponse mapToReservationResponse(Reservation reservation) {
+        return new ReservationResponse(
+            reservation.getId(),
+            reservation.getDesk().getId(),
+            reservation.getDesk().getDeskNumber(),
+            reservation.getDesk().getFloor().getFloorNumber(),
+            reservation.getUser().getId(),
+            reservation.getUser().getFullName(),
+            reservation.getReservationDate(),
+            reservation.getStatus()
+        );
+    }
 
     @Transactional
     public ReservationResponse createReservation(CreateReservationRequest request) {
@@ -63,15 +82,52 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.CONFIRMED);
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        return new ReservationResponse(
-            savedReservation.getId(),
-            savedReservation.getDesk().getId(),
-            savedReservation.getDesk().getDeskNumber(),
-            savedReservation.getDesk().getFloor().getFloorNumber(),
-            savedReservation.getUser().getId(),
-            savedReservation.getUser().getFullName(),
-            savedReservation.getReservationDate(),
-            savedReservation.getStatus()
-        );
+        return mapToReservationResponse(savedReservation);
+    }
+
+    @Transactional(readOnly = true)
+    public List <ReservationResponse> getReservationsForCurrentUser() {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+            .orElseThrow(() -> new EntityNotFoundException("User with email " + currentUserEmail + " does not exist."));
+
+        List<Reservation> reservations = reservationRepository.findByUserIdWithDeskAndFloor(currentUser.getId());
+        return reservations.stream()
+                .map(this::mapToReservationResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ReservationResponse> getAllReservationsForAdmin(LocalDate reservationDate, Long floorId, ReservationStatus status, Pageable pageable) {
+        Page<Reservation> reservationsPage = reservationRepository.findAllWithFilters(reservationDate, floorId, status, pageable);
+        return reservationsPage.map(this::mapToReservationResponse);
+    }
+
+    @Transactional
+    public void cancelReservation(Long reservationId) {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+            .orElseThrow(() -> new EntityNotFoundException("User with email " + currentUserEmail + " does not exist."));
+        Reservation reservation = reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new EntityNotFoundException("Reservation with ID " + reservationId + " does not exist."));
+
+        // checks if the reservation belongs to the current user 
+        if (!reservation.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalStateException("You can only cancel your own reservations.");
+        }
+
+        // checks if the reservation is already canceled to prevent redundant operations
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new IllegalStateException("This reservation is already canceled.");
+        }
+
+        //check for date of reservation being in the past or today
+        if (!reservation.getReservationDate().isAfter(java.time.LocalDate.now())) {
+            throw new IllegalStateException("Cannot cancel a reservation made for today or a past date.");
+        }
+
+        // updates the reservation status to CANCELLED and saves the change
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
     }
 }

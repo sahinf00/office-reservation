@@ -3,6 +3,7 @@ package com.ofis.rezervasyon.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ofis.rezervasyon.dto.request.CreateFloorRequest;
 import com.ofis.rezervasyon.dto.response.DeskResponse;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class FloorService {
     private final FloorRepository floorRepository;
 
+    @Transactional
     public FloorResponse createFloor(CreateFloorRequest request) {
         if(floorRepository.existsByFloorNumber(request.floorNumber())) {
             throw new IllegalStateException("Floor with number " + request.floorNumber() + " already exists.");
@@ -35,6 +37,7 @@ public class FloorService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<FloorResponse> getAllFloors() {
         List<Floor> floors = floorRepository.findAll();
         return floors.stream()
