@@ -1,7 +1,10 @@
 package com.ofis.rezervasyon.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,6 +95,12 @@ public class ReservationService {
         return reservations.stream()
                 .map(this::mapToReservationResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ReservationResponse> getAllReservationsForAdmin(LocalDate reservationDate, Long floorId, ReservationStatus status, Pageable pageable) {
+        Page<Reservation> reservationsPage = reservationRepository.findAllWithFilters(reservationDate, floorId, status, pageable);
+        return reservationsPage.map(this::mapToReservationResponse);
     }
 
     @Transactional

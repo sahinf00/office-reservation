@@ -3,6 +3,8 @@ package com.ofis.rezervasyon.repository;
 import com.ofis.rezervasyon.enums.ReservationStatus;
 import com.ofis.rezervasyon.model.Reservation;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +19,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"desk", "desk.floor"})
     @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId ORDER BY r.reservationDate DESC")
     List<Reservation> findByUserIdWithDeskAndFloor(@Param("userId") Long userId);
+
+    @EntityGraph(attributePaths = {"desk", "desk.floor"})
+    @Query("SELECT r FROM Reservation r " +
+        "WHERE (cast(:reservationDate as date) IS NULL OR r.reservationDate = :reservationDate) " +
+        "AND (cast(:floorId as long) IS NULL OR r.desk.floor.id = :floorId) " +
+        "AND (cast(:status as string) IS NULL OR r.status = :status)")
+    Page<Reservation> findAllWithFilters(
+            @Param("reservationDate") LocalDate reservationDate,
+            @Param("floorId") Long floorId,
+            @Param("status") ReservationStatus status,
+            Pageable pageable
+    );
 
     boolean existsByUserIdAndReservationDateAndStatus(Long userId, LocalDate reservationDate, ReservationStatus status);
 
