@@ -25,7 +25,7 @@ public class StatsService {
         
         LocalDate targetDate = (date != null) ? date : LocalDate.now();
 
-        List<FloorOccupancyResponse> rawStats = deskRepository.findOccupancyByFloorRaw(targetDate);
+        List<FloorOccupancyResponse> rawStats = deskRepository.findOccupancyByFloorRaw(targetDate, ReservationStatus.CONFIRMED);
         return rawStats.stream()
                 .map(this::calculateOccupancyRate)
                 .toList();
