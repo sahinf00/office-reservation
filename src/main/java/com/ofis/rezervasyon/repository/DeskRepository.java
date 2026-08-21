@@ -35,7 +35,7 @@ public interface DeskRepository extends JpaRepository<Desk, Long> {
        "WHERE d.isActive = true " +
        "GROUP BY d.floor.id, d.floor.number, d.floor.name")
     List<FloorOccupancyResponse> findOccupancyByFloorRaw(@Param("today") LocalDate today);
-
+    long countByIsActiveTrue();
     List<Desk> findByIsActiveTrue();
     List<Desk> findByFloorId(Long floorId);
     List<Desk> findByFloorIdAndIsActiveTrue(Long floorId);

@@ -40,6 +40,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             Pageable pageable
     );
 
+    long countByReservationDateAndStatus(LocalDate reservationDate, ReservationStatus status);
     boolean existsByUserIdAndReservationDateAndStatus(Long userId, LocalDate reservationDate, ReservationStatus status);
 
     boolean existsByDeskIdAndReservationDateAndStatus(Long deskId, LocalDate reservationDate, ReservationStatus status);
