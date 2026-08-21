@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,6 +20,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"desk", "desk.floor"})
     @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId ORDER BY r.reservationDate DESC")
     List<Reservation> findByUserIdWithDeskAndFloor(@Param("userId") Long userId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Reservation r SET r.status = :newStatus " +
+           "WHERE r.status = :currentStatus AND r.reservationDate < :currentDate")
+    int updateCompletedReservations(@Param("newStatus") ReservationStatus newStatus,
+                                       @Param("currentStatus") ReservationStatus currentStatus,
+                                       @Param("currentDate") LocalDate currentDate);
 
     @EntityGraph(attributePaths = {"desk", "desk.floor"})
     @Query("SELECT r FROM Reservation r " +

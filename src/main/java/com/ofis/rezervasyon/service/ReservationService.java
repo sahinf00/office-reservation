@@ -72,7 +72,7 @@ public class ReservationService {
             currentUser.getId(), 
             request.reservationDate(), 
             ReservationStatus.CONFIRMED)) {
-            throw new IllegalStateException("You already have an active reservation for this desk on the selected date.");
+            throw new IllegalStateException("You already have an active reservation for a desk on the selected date.");
         }
 
         Reservation reservation = new Reservation();
@@ -129,5 +129,14 @@ public class ReservationService {
         // updates the reservation status to CANCELLED and saves the change
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
+    }
+
+    @Transactional
+    public int updateCompletedReservations() {
+        return reservationRepository.updateCompletedReservations(
+            ReservationStatus.COMPLETED, 
+            ReservationStatus.CONFIRMED, 
+            LocalDate.now()
+        );
     }
 }
